@@ -16,19 +16,21 @@ int main(int argc, char *argv[])
 	ColorTransformer transform;
 	
 	if (strcmp(argv[1], "--rgb2gray") == 0) {
-
+		convert.Convert(inputImage, outputImage, 0);
 	}
 	else if (strcmp(argv[1], "--gray2rgb") == 0) {
-
+		convert.Convert(inputImage, outputImage, 1);
 	}
 	else if (strcmp(argv[1], "--rgb2hsv") == 0) {
-
+		outputImage= Mat(inputImage.rows, inputImage.cols, CV_8UC3);
+		convert.Convert(inputImage, outputImage, 2);
 	}
 	else if (strcmp(argv[1], "--hsv2rgb") == 0) {
-
+		outputImage = Mat(inputImage.rows, inputImage.cols, CV_8UC3);
+		convert.Convert(inputImage, outputImage, 3);
 	}
 	else if (strcmp(argv[1], "--bright") == 0) {
-
+		
 	}
 	else if (strcmp(argv[1], "--contrast") == 0) {
 
@@ -45,8 +47,6 @@ int main(int argc, char *argv[])
 
 	
 	imwrite("output.jpg", outputImage);
-	namedWindow("Input Image");
-	namedWindow("Output Image");
 
 	imshow("Input Image", inputImage);
 	imshow("Output Image", outputImage);
