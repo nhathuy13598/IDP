@@ -42,19 +42,28 @@ void NearestNeighborInterpolate::Interpolate(
 					 {ceil(tx), ceil(ty)},
 					 {floor(tx), ceil(ty)} };
 	float minDist = 999999999;
-	int chosenIndex;
+	int chosenIndex = 0;
 	for (int i = 0; i < 4; i++) { // tìm điểm có khoảng cách ngắn nhất so với (tx, ty)
-		float dist = EuclidDistance(tx, ty, nb[i][0], nb[i][1]);
-		if (dist < minDist) {
-			minDist = dist;
-			chosenIndex = i;
+		if (nb[i][0] >= 0 && nb[i][1] >= 0) {
+			float dist = EuclidDistance(tx, ty, nb[i][0], nb[i][1]);
+			if (dist < minDist) {
+				minDist = dist;
+				chosenIndex = i;
+			}
 		}
 	}
 	uchar* pPoint = pSrc;
-	pPoint += nb[chosenIndex][1] * srcWidthStep + nb[chosenIndex][0] * nChannels;
-	pDstRow[2] = pPoint[2];
-	pDstRow[1] = pPoint[1];
-	pDstRow[0] = pPoint[0];
+	if (minDist != 999999999) {
+		pPoint += nb[chosenIndex][1] * srcWidthStep + nb[chosenIndex][0] * nChannels;
+		pDstRow[2] = pPoint[2];
+		pDstRow[1] = pPoint[1];
+		pDstRow[0] = pPoint[0];
+	}
+	else {
+		pDstRow[2] = 0;
+		pDstRow[1] = 0;
+		pDstRow[0] = 0;
+	}
 }
 
 void AffineTransform::Translate(float dx, float dy) {
@@ -74,6 +83,7 @@ void AffineTransform::Rotate(float angle) {
 			_matrixTransform.at<float>(i, j) = data[i*3+j];
 		}
 	}
+	cout << _matrixTransform << endl;
 }
 void AffineTransform::Scale(float sx, float sy) {
 	float data[9] = { sx, 0.0, 0.0, 0.0, sy, 0.0, 0.0, 0.0, 1.0};
@@ -131,6 +141,29 @@ int GeometricTransformer::RotateKeepImage(
 }
 int GeometricTransformer::RotateUnkeepImage(
 	const Mat &srcImage, Mat &dstImage, float angle, PixelInterpolate* interpolator) {
+	dstImage = Mat(srcImage.rows, srcImage.cols, CV_8UC3);
+	uchar* pSrc = srcImage.data;
+	uchar* pDst = dstImage.data;
+	int rows = srcImage.rows;
+	int cols = srcImage.cols;
+	int channels = srcImage.channels();
+	int widthStep = srcImage.step[0];
+	// Tạo ma trận Transform
+	AffineTransform *at = new AffineTransform();
+	at->Rotate(angle);
+	uchar* pRowDst = pDst;
+	for (int i = 0; i < rows; i++ , pRowDst += widthStep) {		
+		for (int j = 0; j < cols; j++ , pDst += channels) {
+			float iTemp = i;
+			float jTemp = j;
+			// Tìm điểm ảnh trên ảnh gốc dựa vào ảnh kết quả * ma trận nghịch đảo Transform
+			at->TransformPoint(iTemp,jTemp);
+
+			// Nội suy giá trị màu
+			interpolator->Interpolate(iTemp, jTemp, pSrc, widthStep, channels, pDst);
+		}
+	}
+	delete at;
 	return 1;
 }
 int GeometricTransformer::Scale(
