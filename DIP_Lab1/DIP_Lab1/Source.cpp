@@ -9,7 +9,7 @@ using namespace std;
 using namespace cv;
 int main(int argc, char *argv[])
 {
-	Mat inputImage = imread("lena.jpg", CV_LOAD_IMAGE_COLOR);
+	Mat inputImage = imread(argv[2], CV_LOAD_IMAGE_COLOR);
 	Mat outputImage;
 
 	Converter convert;
@@ -30,19 +30,20 @@ int main(int argc, char *argv[])
 		convert.Convert(inputImage, outputImage, 3);
 	}
 	else if (strcmp(argv[1], "--bright") == 0) {
-		
+		transform.ChangeBrightness(inputImage, outputImage, atoi(argv[3]));
 	}
 	else if (strcmp(argv[1], "--contrast") == 0) {
-
+		transform.ChangeContrast(inputImage, outputImage, atoi(argv[3]));
 	}
 	else if (strcmp(argv[1], "--hist") == 0) {
-
+		outputImage = Mat::zeros(inputImage.size(), inputImage.type());
+		transform.CalcHistogram(inputImage, outputImage);
 	}
 	else if (strcmp(argv[1], "--equalhist") == 0) {
 		transform.HistogramEqualization(inputImage, outputImage);
 	}
 	else if (strcmp(argv[1], "--drawhist") == 0) {
-
+		transform.DrawHistogram(inputImage, outputImage);
 	}
 
 	

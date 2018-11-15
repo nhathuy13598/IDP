@@ -17,10 +17,13 @@ void BilinearInterpolate::Interpolate(
 	for (int i = 0; i < 4; i++) {
 		pPoint = pSrc;
 		pPoint += nb[i][1] * srcWidthStep + nb[i][0] * nChannels;
-		colorVal[i][2] = pPoint[2];//r
-		colorVal[i][1] = pPoint[1];//g
-		colorVal[i][0] = pPoint[0];//b
+		//colorVal[i][2] = uchar(pPoint[2]);//r
+		//colorVal[i][1] = uchar(pPoint[1]);//g
+		//colorVal[i][0] = uchar(pPoint[0]);//b
 
+		colorVal[i][2] = *(pPoint + 2); //r
+		colorVal[i][1] = *(pPoint + 1);//g
+		colorVal[i][0] = *(pPoint + 0);//b
 	}
 	// distance
 	float a = float(tx) - nb[0][0], b = float(ty) - nb[0][1];
@@ -190,7 +193,7 @@ int GeometricTransformer::RotateKeepImage(
 			transformer->TransformPoint(x1, y1);
 			x1 += colHalf;
 			y1 += rowHalf;
-			if (x1 < 0 || x1 > cols || y1 < 0 || y1 > rows)
+			if (x1 < 0 || x1 >= cols || y1 < 0 || y1 >= rows)
 				continue;
 			pPoint = pData1;
 			if (int(x1) == x1 && int(y1) == y1)

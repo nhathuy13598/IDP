@@ -73,7 +73,8 @@ public:
 		0: Nếu không tạo được ảnh kết quả hoặc ảnh input không tồn tại
 	*/
 	int DrawHistogram(const Mat& sourceImage, Mat& histImage);
-	
+	// hàm phụ
+	void Normalize(const Mat& source_histogram, Mat& destination_histogram, double alpha, double beta);
 	ColorTransformer();
 	~ColorTransformer();
 };
